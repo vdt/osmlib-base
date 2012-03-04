@@ -59,6 +59,9 @@ module OSM
     
     # Tags for this object
     attr_reader :tags
+
+    # If this object is visable (ie if it's deleted or not)
+    attr_reader :visable
     
     # The OSM::Database this object is in (if any)
     attr_accessor :db
@@ -69,7 +72,7 @@ module OSM
       api.get_object(type, id)
     end
     
-    def initialize(id, user, timestamp, uid=-1, version=1) #:nodoc:
+    def initialize(id, user, timestamp, uid=-1, version=1, visable=nil) #:nodoc:
       raise NotImplementedError.new('OSMObject is a virtual base class for the Node, Way, and Relation classes') if self.class == OSM::OSMObject
       
       @id = id.nil? ? _next_id : _check_id(id)
@@ -77,6 +80,7 @@ module OSM
       @uid = uid
       @user = user
       @timestamp = _check_timestamp(timestamp) unless timestamp.nil?
+      @visable = visable
       @db = nil
       @tags = Tags.new
     end
@@ -94,7 +98,16 @@ module OSM
     
     # The list of attributes for this object
     def attribute_list # :nodoc:
-      [:id, :version, :uid, :user, :timestamp]
+      if @visable == nil
+        return [:id, :version, :uid, :user, :timestamp]
+      else
+        return [:id, :version, :visable, :uid, :user, :timestamp]
+      end
+    end
+
+    # Set visable/not visable for this object
+    def visable=(visable)
+      @visable = _check_visable(visable)
     end
     
     # Returns a hash of all non-nil attributes of this object.
@@ -253,6 +266,14 @@ module OSM
       end
       timestamp
     end
+
+    def _check_visable(visable)
+      if visable == true or visable == false or visable == nil
+        return visable
+      else
+        raise ArgumentError, "visable must be true/false"
+      end
+    end
     
     def _check_lon(lon)
       if lon.kind_of?(Numeric)
@@ -317,7 +338,11 @@ module OSM
     
     # List of attributes for a Node
     def attribute_list
-      [:id, :version, :uid, :user, :timestamp, :lon, :lat]
+      if @visable == nil
+        return [:id, :version, :uid, :user, :timestamp, :lon, :lat]
+      else
+        return [:id, :version, :visable, :user, :timestamp, :lon, :lat]
+      end
     end
     
     # Add one or more tags to this node.
@@ -367,7 +392,11 @@ module OSM
     # call-seq: to_s -> String
     #
     def to_s
-      "#<OSM::Node id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\" lon=\"#{@lon}\" lat=\"#{@lat}\">"
+      if @visable not nil
+        "#<OSM::Node id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\" lon=\"#{@lon}\" lat=\"#{@lat}\" visable=\"#{@visable}\">"
+      else
+        "#<OSM::Node id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\" lon=\"#{@lon}\" lat=\"#{@lat}\">"
+      end
     end
     
     # Return XML for this node. This method uses the XML Builder
