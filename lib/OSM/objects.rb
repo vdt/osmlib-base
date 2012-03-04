@@ -60,8 +60,8 @@ module OSM
     # Tags for this object
     attr_reader :tags
 
-    # If this object is visable (ie if it's deleted or not)
-    attr_reader :visable
+    # If this object is visible (ie if it's deleted or not)
+    attr_reader :visible
     
     # The OSM::Database this object is in (if any)
     attr_accessor :db
@@ -72,7 +72,7 @@ module OSM
       api.get_object(type, id)
     end
     
-    def initialize(id, user, timestamp, uid=-1, version=1, visable=nil) #:nodoc:
+    def initialize(id, user, timestamp, uid=-1, version=1, visible=nil) #:nodoc:
       raise NotImplementedError.new('OSMObject is a virtual base class for the Node, Way, and Relation classes') if self.class == OSM::OSMObject
       
       @id = id.nil? ? _next_id : _check_id(id)
@@ -80,7 +80,7 @@ module OSM
       @uid = uid
       @user = user
       @timestamp = _check_timestamp(timestamp) unless timestamp.nil?
-      @visable = visable
+      @visible = visible
       @db = nil
       @tags = Tags.new
     end
@@ -98,16 +98,16 @@ module OSM
     
     # The list of attributes for this object
     def attribute_list # :nodoc:
-      if @visable == nil
+      if @visible == nil
         return [:id, :version, :uid, :user, :timestamp]
       else
-        return [:id, :version, :visable, :uid, :user, :timestamp]
+        return [:id, :version, :visible, :uid, :user, :timestamp]
       end
     end
 
-    # Set visable/not visable for this object
-    def visable=(visable)
-      @visable = _check_visable(visable)
+    # Set visible/not visible for this object
+    def visible=(visible)
+      @visible = _check_visible(visible)
     end
     
     # Returns a hash of all non-nil attributes of this object.
@@ -267,11 +267,11 @@ module OSM
       timestamp
     end
 
-    def _check_visable(visable)
-      if visable == true or visable == false or visable == nil
-        return visable
+    def _check_visible(visible)
+      if visible == true or visible == false or visible == nil
+        return visible
       else
-        raise ArgumentError, "visable must be true/false"
+        raise ArgumentError, "visible must be true/false"
       end
     end
     
@@ -316,10 +316,10 @@ module OSM
     # Create new Node object.
     #
     # If +id+ is +nil+ a new unique negative ID will be allocated.
-    def initialize(id=nil, user=nil, timestamp=nil, lon=nil, lat=nil, uid=-1, version=1)
+    def initialize(id=nil, user=nil, timestamp=nil, lon=nil, lat=nil, uid=-1, version=1, visible=nil)
       @lon = _check_lon(lon) unless lon.nil?
       @lat = _check_lat(lat) unless lat.nil?
-      super(id, user, timestamp, uid, version)
+      super(id, user, timestamp, uid, version, visible)
     end
     
     def type
@@ -338,10 +338,10 @@ module OSM
     
     # List of attributes for a Node
     def attribute_list
-      if @visable == nil
+      if @visible == nil
         return [:id, :version, :uid, :user, :timestamp, :lon, :lat]
       else
-        return [:id, :version, :visable, :user, :timestamp, :lon, :lat]
+        return [:id, :version, :visible, :user, :timestamp, :lon, :lat]
       end
     end
     
@@ -392,8 +392,8 @@ module OSM
     # call-seq: to_s -> String
     #
     def to_s
-      if @visable not nil
-        "#<OSM::Node id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\" lon=\"#{@lon}\" lat=\"#{@lat}\" visable=\"#{@visable}\">"
+      if @visible != nil
+        "#<OSM::Node id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\" lon=\"#{@lon}\" lat=\"#{@lat}\" visible=\"#{@visible}\">"
       else
         "#<OSM::Node id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\" lon=\"#{@lon}\" lat=\"#{@lat}\">"
       end
@@ -439,9 +439,9 @@ module OSM
     # user:: Username
     # timestamp:: Timestamp of last change
     # nodes:: Array of Node objects and/or node IDs
-    def initialize(id=nil, user=nil, timestamp=nil, nodes=[], uid=-1, version=1)
+    def initialize(id=nil, user=nil, timestamp=nil, nodes=[], uid=-1, version=1, visible=nil)
       @nodes = nodes.collect{ |node| node.kind_of?(OSM::Node) ? node.id : node }
-      super(id, user, timestamp, uid, version)
+      super(id, user, timestamp, uid, version, visible)
     end
     
     def type
@@ -557,7 +557,11 @@ module OSM
     # call-seq: to_s -> String
     #
     def to_s
-      "#<OSM::Way id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\">"
+      if @visible == nil
+        "#<OSM::Way id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\">"
+      else
+        "#<OSM::Way id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\" visible=\"#{@visible}\">"
+      end
     end
     
     # Return XML for this way. This method uses the Builder library.
@@ -589,9 +593,9 @@ module OSM
     # Create new Relation object.
     #
     # If +id+ is +nil+ a new unique negative ID will be allocated.
-    def initialize(id=nil, user=nil, timestamp=nil, members=[], uid=-1, version=1)
+    def initialize(id=nil, user=nil, timestamp=nil, members=[], uid=-1, version=1, visible=nil)
       @members = members
-      super(id, user, timestamp, uid, version)
+      super(id, user, timestamp, uid, version, visible)
     end
     
     def type
@@ -667,7 +671,11 @@ module OSM
     # call-seq: to_s -> String
     #
     def to_s
-      "#<OSM::Relation id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\">"
+      if @visible == nil
+        "#<OSM::Relation id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\">"
+      else
+        "#<OSM::Relation id=\"#{@id}\" user=\"#{@user}\" timestamp=\"#{@timestamp}\" visible=\"#{@visible}\">"
+      end
     end
     
     # Return the member with a specified type and id. Returns nil
