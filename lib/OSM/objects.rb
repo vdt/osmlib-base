@@ -757,6 +757,69 @@ module OSM
     end
     
   end
+
+  class Action
+    # OSM Action type
+    attr_reader :type
+    
+    # The list of objects
+    attr_reader :objects
+    
+    def initialize(type)
+      case type
+      when :create
+        @type = :create
+      when :modify
+        @type = :modify
+      when :delete
+        @type = :delete
+      else
+        raise TypeError.new("Action type must be :create, :modify or delete")
+      end
+      @objects = []
+    end
+    
+    def push(object)
+      if object.class == Node or object.class == Way or object.class == Relation
+        @objects.push object
+      else
+        raise TypeError.new("Object must be Node, Way or Relation")
+      end
+    end
+    
+    def objects=(objects)
+      objects.each do |obj|
+        self.push(obj)
+      end
+    end
+    
+  end
   
+  class Change
+
+    # The list of actions
+    attr_reader :actions
+
+    def initialize
+      @actions = []
+    end
+    
+    def push(action)
+      if action.class == Action
+        @actions << action
+      end
+    end
+
+    def actions=(actions)
+      actions.each do |act|
+        self.push(act)
+      end
+    end
+    
+    def objects
+      @actions.collect {|a| a.objects }.flatten
+    end
+    
+  end
 end
 

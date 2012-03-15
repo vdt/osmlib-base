@@ -218,6 +218,64 @@ module OSM
     end
     
   end
+
+  class ChangeCallbacks < ObjectListCallbacks
+
+    def on_start_element(name, attr_hash)   # :nodoc:
+      case name
+      when 'node'      then _start_node(attr_hash)
+      when 'way'       then _start_way(attr_hash)
+      when 'relation'  then _start_relation(attr_hash)
+      when 'tag'       then _tag(attr_hash)
+      when 'nd'        then _nd(attr_hash)
+      when 'member'    then _member(attr_hash)
+      when 'create'    then _start_create()
+      when 'modify'    then _start_modify()
+      when 'delete'    then _start_delete()
+      end
+    end
+    
+    def on_end_element(name)    # :nodoc:
+      case name
+      when 'node'     then _end_node()
+      when 'way'      then _end_way()
+      when 'relation' then _end_relation()
+      when 'create' then _end_action()
+      when 'modify' then _end_action()
+      when 'delete' then end_action()
+      end
+    end
+    
+    def start_document
+      @change = OSM::Change.new
+    end
+
+    def _start_create
+      @action = OSM::Action.new(:create)
+      @list = []
+    end
+
+    def _start_modify
+      @action = OSM::Action.new(:modify)
+      @list = []
+    end
+
+    def _start_delete
+      @action = OSM::Action.new(:delete)
+      @list = []
+    end
+
+    def _end_action
+      @action.objects = @list
+      @change.push(@action)
+      @action = nil
+      @list = []
+    end
+
+    def result
+      return @change
+    end
+  end
   
   # This is the base class for the OSM::StreamParser::REXML,
   # OSM::StreamParser::Libxml, and OSM::StreamParser::Expat
