@@ -11,7 +11,7 @@ class TestChangeXML < Test::Unit::TestCase
     @out = ''
     @doc = Builder::XmlMarkup.new(:target => @out)
   end
-  
+
   def test_change_with_nodes
     
     parser = OSM::StreamParser.new(:callbacks => OSM::ChangeCallbacks.new, :string => %q{<?xml version="1.0" encoding="UTF-8"?>
@@ -33,6 +33,8 @@ class TestChangeXML < Test::Unit::TestCase
     assert_kind_of OSM::Action, change.actions[0]
     assert_equal 2, change.actions[0].objects.length
     assert_equal 3, change.objects.length
+    assert_equal 1, change.objects[0].tags.length
+    assert_equal 'JOSM', change.objects[0].tags['created_by']
   end
 end
 

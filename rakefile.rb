@@ -39,9 +39,9 @@ spec = Gem::Specification::new do |s|
   s.description = <<EOF
 Basic support for OpenStreetMap data model (Nodes, Ways, Relations and Tags). Parsing of OSM XML files. Access to OpenStreetMap API.
 EOF
-  s.author = 'Jochen Topf'
-  s.email = 'jochen@topf.org'
-  s.homepage = 'osmlib.rubyforge.org'
+  s.author = 'Serge Wroclawski'
+  s.email = 'serge+osmlib@wroclawski.org'
+  s.homepage = 'http://github.emacsen.net/emacsen/osmlib-base'
   s.rubyforge_project = 'osmlib'
   
   s.require_path = 'lib'

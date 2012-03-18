@@ -13,6 +13,7 @@ conditions are required by law.
 == Author
 
 Jochen Topf <jochen@topf.org>
+Serge Wroclawski <serge+osmlib@wroclawski.org>
 
 == Web
 
@@ -75,6 +76,26 @@ As a convenience tags can also be accessed with their name only:
 
 This is implemented with the method_missing() function. Of course it
 only works for tag keys which are allowed as ruby method names.
+
+There is also an OSM::Change object which can be used to store
+OSM data as it would appear in an OSMChange file.
+
+  change = OSM::Change.new
+
+OSM::Change objects consist of OSM::Action objects, which contain a
+single action as well as one or more Node, Way or Relation. An action
+must be created with an action keyword :create, :modify, or :delete)
+
+  node = OSM::Node.new(17, 'user', '2007-10-31T23:48:54Z', 7.4, 53.2)
+  action = OSM::Action.new(:create)
+  action.push(node)
+
+OSM::Change objects have two relevant methods, .actions, which returns
+an Array of OSM::Actions, and objects, which returns all the objects
+in all the actions.
+
+   actions = change.actions
+   objects = change.objects
 
 === Accessing the OSM API
 

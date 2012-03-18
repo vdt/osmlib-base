@@ -85,6 +85,7 @@ module OSM
       @tags = Tags.new
     end
     
+    
     # Create an error when somebody tries to set the ID.
     # (We need this here because otherwise method_missing will be called.)
     def id=(id) # :nodoc:
