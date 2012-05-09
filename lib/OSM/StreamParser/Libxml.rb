@@ -33,9 +33,9 @@ module OSM
 
       @parser = XML::SaxParser.new
       if @filename.nil?
-        @parser.string = @string
+        @parser = XML::SaxParser.string(@string)
       else
-        @parser.filename = @filename
+        @parser = XML::SaxParser.file(@filename)
       end
       @parser.callbacks = @callbacks
     end
